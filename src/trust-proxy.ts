@@ -305,7 +305,7 @@ export class ProxyBGateway {
       "EXECUTION_RECORD",
       execution,
       intentHash ? [intentHash] : []
-    );
+    ); 
 
     // Record spend after successful execution
     // (In production: extract cost from the execution envelope metadata)

@@ -184,7 +184,7 @@ async function main() {
   // ── Ledger state ──────────────────────────────────────────────────────────
   console.log("\n── Ledger state ──");
   const batch = ledger.flush();
-  if (batch) {
+  if (batch) {  
     ledger.anchorBatch(batch.batch_id, "0xfakeL2TxHash");
     console.log("✓ Merkle batch committed, root:", batch.merkle_root.slice(0, 16) + "...");
   }

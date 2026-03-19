@@ -154,7 +154,7 @@ export interface ExecutionEnvelopeParams {
   _cost_usd?: number;
   proxyKey: KeyPair;
 }
-
+  
 export interface ExecutionEnvelope {
   envelope_type: "ExecutionEnvelope";
   spec_version: "0.4";
