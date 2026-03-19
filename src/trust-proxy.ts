@@ -169,6 +169,7 @@ export class ProxyAGateway {
       acceptanceReceipt: acceptance,
       status,
       outputData,
+      _cost_usd: p._estimated_cost_usd,
       proxyKey: this.cfg.proxyKey,
     });
 
@@ -221,6 +222,7 @@ export interface AcceptResult {
  */
 export class ProxyBGateway {
   private intentEntryHashes = new Map<string, string>(); // trace_id → entry_hash
+  private intentInitiators = new Map<string, string>(); // trace_id → initiator did
 
   constructor(private cfg: ProxyBConfig) {}
 
@@ -270,6 +272,7 @@ export class ProxyBGateway {
     }
 
     // 5. Record Intent in DAG ledger
+    this.intentInitiators.set(intent.trace_id, intent.initiator.did);
     const intentEntry = this.cfg.ledger.append("INTENT_RECORD", intent);
     this.intentEntryHashes.set(intent.trace_id, intentEntry.entry_hash);
 
@@ -306,6 +309,11 @@ export class ProxyBGateway {
 
     // Record spend after successful execution
     // (In production: extract cost from the execution envelope metadata)
-    // this.cfg.budgetEngine.recordSpend(initiatorDid, actualCostUsd);
+    if (execution.status === "COMPLETED") {
+      const initiatorDid = this.intentInitiators.get(execution.trace_id);
+      if (initiatorDid) {
+        this.cfg.budgetEngine.recordSpend(initiatorDid, execution._cost_usd ?? 0);
+      }
+    }
   }
 }

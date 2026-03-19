@@ -31,7 +31,8 @@ class InProcessNetwork {
       return { acceptance: result.acceptance };
     }
     if (path === "/executed") {
-      // fire-and-forget in real proxy, we await here for test determinism
+      const { execution } = body as { execution: unknown };
+      await this.proxyB.handleExecution(execution as any);
       return { ok: true };
     }
     throw new Error(`Unknown path: ${path}`);
@@ -128,6 +129,15 @@ async function main() {
     console.log("  intent_hash:     ", a2a.acceptance_receipt.intent_hash.slice(0, 16) + "...");
     console.log("  acceptance sig:  ", a2a.acceptance_receipt.signatures[0].value.slice(0, 20) + "...");
     console.log("  execution status:", a2a.execution_envelope.status);
+
+    // Check remaining budget after spend is recorded
+    const recordSpend = budgetEngine.check("did:workload:payment-agent-01", "execute_wire_transfer", 0).remainingDailyUsd;
+    console.log("  remainingDailyUsd after execution:", recordSpend);
+    if (recordSpend !== 95_000) {
+      console.error(`✗ Budget check failed: expected 95000, got ${recordSpend}`);
+    } else {
+      console.log("✓ remainingDailyUsd decreased by $5000");
+    }
   }
 
   // ── Test 2: Budget exceeded ───────────────────────────────────────────────

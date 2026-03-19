@@ -151,6 +151,7 @@ export interface ExecutionEnvelopeParams {
   acceptanceReceipt: AcceptanceReceipt;
   status: "COMPLETED" | "FAILED";
   outputData: unknown;   // will be hashed, NOT stored
+  _cost_usd?: number;
   proxyKey: KeyPair;
 }
 
@@ -160,6 +161,7 @@ export interface ExecutionEnvelope {
   trace_id: string;
   timestamp: string;
   intent_hash: string;
+  _cost_usd?: number;   // optional for observability, not part of hash/signature
   acceptance_hash: string;
   status: "COMPLETED" | "FAILED";
   result: { output_hash: string };
@@ -177,6 +179,7 @@ export async function buildExecutionEnvelope(
     intent_hash: computeEnvelopeHash(
       p.intentEnvelope as unknown as Record<string, unknown>
     ),
+    _cost_usd: p._cost_usd,
     acceptance_hash: computeEnvelopeHash(
       p.acceptanceReceipt as unknown as Record<string, unknown>
     ),
